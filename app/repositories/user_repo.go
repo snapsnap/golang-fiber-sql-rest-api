@@ -23,7 +23,7 @@ func NewUserRepoImpl(db *sql.DB) UserRepo {
 
 // FindByEmail implements UserRepo.
 func (u *UserRepoImpl) FindByEmail(ctx context.Context, tx *sql.Tx, email string) (*mdldomain.User, error) {
-	query := "SELECT email FROM users WHERE email = ?"
+	query := "SELECT email, password FROM users WHERE email = ?"
 	rows, err := tx.QueryContext(ctx, query, email)
 	if err != nil {
 		return nil, err
@@ -31,7 +31,7 @@ func (u *UserRepoImpl) FindByEmail(ctx context.Context, tx *sql.Tx, email string
 	defer rows.Close()
 	user := mdldomain.User{}
 	if rows.Next() {
-		err = rows.Scan(&user.Email)
+		err = rows.Scan(&user.Email, &user.Password)
 		if err != nil {
 			return nil, err
 		}

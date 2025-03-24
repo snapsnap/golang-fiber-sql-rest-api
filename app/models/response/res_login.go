@@ -1,5 +1,5 @@
 package response
 
 type ResLogin struct {
-	Token int `json:"token"`
+	Token string `json:"token"`
 }

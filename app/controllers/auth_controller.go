@@ -20,6 +20,25 @@ func NewAuthController(auth services.AuthService) *AuthController {
 	return &AuthController{AuthService: auth}
 }
 
+func (ac *AuthController) LoginUser(ctx *fiber.Ctx) error {
+	c, cancel := context.WithTimeout(ctx.Context(), 10*time.Second)
+	defer cancel()
+
+	var req request.ReqLogin
+	if err := ctx.BodyParser(&req); err != nil {
+		return ctx.Status(http.StatusUnprocessableEntity).JSON(models.ResError("Unprocessable Entity", map[string]interface{}{}))
+	}
+	fails := utils.Validate(req)
+	if len(fails) > 0 {
+		return ctx.Status(http.StatusBadRequest).JSON(models.ResError("Validation failed", fails))
+	}
+	res, err := ac.AuthService.Login(c, &req)
+	if err != nil {
+		return ctx.Status(http.StatusInternalServerError).JSON(models.ResError(err.Error(), map[string]interface{}{}))
+	}
+	return ctx.Status(http.StatusOK).JSON(models.ResSuccess(res))
+}
+
 func (ac *AuthController) RegisterUser(ctx *fiber.Ctx) error {
 	c, cancel := context.WithTimeout(ctx.Context(), 10*time.Second)
 	defer cancel()
